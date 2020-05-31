@@ -1,0 +1,6 @@
+app:
+  datasource:
+    jdbc-url: jdbc:postgresql://localhost:5432/mudb
+    username: postgres
+    password: JSAN7%6
+    pool-size: 30

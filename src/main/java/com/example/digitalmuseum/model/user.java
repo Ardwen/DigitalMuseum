@@ -1,7 +1,5 @@
 package com.example.digitalmuseum.model;
 
-import com.sun.istack.internal.NotNull;
-import org.springframework.boot.jackson.JsonComponent;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import javax.validation.constraints.NotBlank;

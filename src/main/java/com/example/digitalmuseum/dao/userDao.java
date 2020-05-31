@@ -18,5 +18,5 @@ public interface UserDao {
 
     Optional<User> selectUserById(UUID id);
 
-    int updateUserById(UUID id, User user);
+    int updateUserEmail(UUID id, String email);
 }

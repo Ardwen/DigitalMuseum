@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS person (
+    id UUID NOT NULL PRIMARY KEY,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(100)
+);
