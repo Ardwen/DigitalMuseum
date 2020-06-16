@@ -1,22 +1,7 @@
 package com.example.digitalmuseum.dao;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.digitalmuseum.model.User;
+public interface UserDAO extends JpaRepository<User,Integer>{
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-public interface UserDao {
-    int insertUser(UUID id, User user);
-
-    default int insertUser(User user){
-        UUID id = UUID.randomUUID();
-        return insertUser(id,user);
-    }
-
-    List<User> selectAllUser();
-
-    Optional<User> selectUserById(UUID id);
-
-    int updateUserEmail(UUID id, String email);
 }

@@ -1,31 +1,40 @@
 package com.example.digitalmuseum.model;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.validation.constraints.NotBlank;
+import javax.persistence.*;
 import java.util.UUID;
 
+@Entity
+@Table(name = "users", catalog = "db")
 public class User {
-    private final UUID id;
-    @NotBlank
-    private final String name;
-    private final String email;
+    @Id
+    private int id;
+    private String name;
+    private String email;
 
-    public User(@JsonProperty("id") UUID id, @JsonProperty("name") String name, @JsonProperty("email") String email) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
+    public User() {
+
     }
 
     public UUID getId() {
         return id;
     }
 
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getEmail() {
         return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
