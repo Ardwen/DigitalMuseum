@@ -20,9 +20,10 @@ public class Museume {
 
     private String name;
     private String introduction;
-
-
-
+    private String contry;
+    private String city;
+    @Transient
+    private ArtImage firstArtImage;
 
 
 }
