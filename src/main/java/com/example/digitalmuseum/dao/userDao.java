@@ -3,7 +3,6 @@ import com.example.digitalmuseum.Util.AuthUtil;
 import com.example.digitalmuseum.model.Security.AppRole;
 import com.example.digitalmuseum.payload.AppUserForm;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.example.digitalmuseum.model.Security.User;
 import org.springframework.social.connect.Connection;
@@ -43,7 +42,7 @@ public class UserDAO {
     public User findAppUserByUserName(String userName) {
         try {
             String sql = "select e from " + User.class.getName() + " e "
-                    + " where e.userName = :userName ";
+                    + " where e.username = :userName ";
             Query query = entityManager.createQuery(sql, User.class);
             query.setParameter("userName", userName);
             return (User) query.getSingleResult();

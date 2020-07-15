@@ -5,10 +5,12 @@ import com.example.digitalmuseum.model.Security.User;
 import com.example.digitalmuseum.payload.AppUserForm;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import org.springframework.validation.ValidationUtils;
 
+@Component
 public class AppUserValidator implements Validator {
     private EmailValidator emailValidator = EmailValidator.getInstance();
 

@@ -4,12 +4,12 @@ import org.springframework.social.connect.Connection;
 import org.springframework.social.connect.ConnectionKey;
 import org.springframework.social.connect.UserProfile;
 
+
 public class AppUserForm {
 
     private Long userId;
     private String email;
     private String userName;
-
     private String password;
     private String role;
     private String signInProvider;

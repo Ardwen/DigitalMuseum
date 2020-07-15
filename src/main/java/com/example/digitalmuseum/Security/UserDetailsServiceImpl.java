@@ -27,13 +27,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private AppRoleDAO appRoleDAO;
 
     @Override
-    public UserDetails loadUserByUsername(String userName) throws UsernameNotFoundException {
-        System.out.println("UserDetailsServiceImpl.loadUserByUsername=" + userName);
-        User appUser = this.appUserDAO.findAppUserByUserName(userName);
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("UserDetailsServiceImpl.loadUserByUsername=" + username);
+        User appUser = this.appUserDAO.findAppUserByUserName(username);
 
         if (appUser == null) {
-            System.out.println("User not found! " + userName);
-            throw new UsernameNotFoundException("User " + userName + " was not found in the database");
+            System.out.println("User not found! " + username);
+            throw new UsernameNotFoundException("User " + username + " was not found in the database");
         }
 
         System.out.println("Found User: " + appUser);

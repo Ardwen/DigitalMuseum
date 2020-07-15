@@ -9,6 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface ArtItemDAO extends JpaRepository<ArtItem,Integer> {
-    List<ArtItem> findByMuseumeAndArtItemIsNull(Museume museume);
-    Page<ArtItem> findByMuseum(Museume museume, Pageable pageable);
+    List<ArtItem> findByMuseume(Museume museume);
+    Page<ArtItem> findByMuseume(Museume museume, Pageable pageable);
 }

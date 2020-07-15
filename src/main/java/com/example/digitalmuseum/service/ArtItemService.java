@@ -19,6 +19,9 @@ public class ArtItemService {
     @Autowired
     ArtItemDAO artItemDAO;
 
+    @Autowired
+    MuseumeService museumeService;
+
     public ArtItem get(int id){ return artItemDAO.getOne(id);}
 
     public void add(ArtItem bean){
@@ -34,14 +37,14 @@ public class ArtItemService {
     }
 
     public Page list(int mid, int start, int size) {
-        Museume museume = MuseumeService.get(mid);
+        Museume museume = museumeService.get(mid);
         Sort sort =  Sort.by(Sort.Direction.DESC,"id");
         Pageable pageable = PageRequest.of(start, size, sort);
-        Page<ArtItem> pageFromJPA =artItemDAO.findByMuseum(museume,pageable);
+        Page<ArtItem> pageFromJPA =artItemDAO.findByMuseume(museume,pageable);
         return pageFromJPA;
     }
 
     public List<ArtItem> listByMuseume(Museume museume){
-        artItemDAO.findByMuseumeAndArtItemIsNull(museume);
+        return artItemDAO.findByMuseume(museume);
     }
 }

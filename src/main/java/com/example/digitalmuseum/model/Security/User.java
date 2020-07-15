@@ -3,7 +3,7 @@ import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users",uniqueConstraints = {@UniqueConstraint(columnNames = {"User_Id","Email"})})
+@Table(name = "users",uniqueConstraints = {@UniqueConstraint(columnNames = {"UserId","Email"})})
 public class User {
 
     @Id
@@ -11,17 +11,19 @@ public class User {
     @Column(name = "UserId", nullable = false)
     private Long userId;
 
-    @Column(name = "UserName", length = 128, nullable = false)
+    @Column(name = "UserName", nullable = false)
     private String username;
 
-    @Column(name = "Email", length = 128, nullable = false)
+    @Column(name = "Email", nullable = false)
     private String email;
 
-    @Column(name = "Encryted_Password", length = 128, nullable = false)
+    @Column(name = "Encryted_Password",  nullable = true)
     private String encrytedPassword;
 
-    @Column(name = "Enabled", length = 1, nullable = false)
+    @Column(name = "Enabled", nullable = false)
     private boolean enabled;
+
+
     @Column(name = "Role")
     private String role;
 

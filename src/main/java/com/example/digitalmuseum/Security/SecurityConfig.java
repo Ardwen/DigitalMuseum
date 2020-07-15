@@ -9,7 +9,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.social.security.SpringSocialConfigurer;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.cors.CorsConfiguration;
 
+@CrossOrigin
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -18,22 +21,30 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private UserDetailsService userDetailsService;
 
     @Autowired
+    private LoginSuccessHandler loginSuccessHandler;
+
+    @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(userDetailsService);
     }
 
     @Override
+    @CrossOrigin
     protected void configure(HttpSecurity http) throws Exception {
+        http.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
         http.csrf().disable();
         http.authorizeRequests().antMatchers("/", "/signup", "/login", "/logout").permitAll();
         http.authorizeRequests().antMatchers("/userInfo").access("hasRole('" + AppRole.ROLE_USER + "')");
         http.authorizeRequests().antMatchers("/admin").access("hasRole('" + AppRole.ROLE_ADMIN + "')");
         http.authorizeRequests().and().exceptionHandling().accessDeniedPage("/403");
-        http.authorizeRequests().and().formLogin()
-                .loginProcessingUrl("/j_spring_security_check")
+        http.authorizeRequests().and()
+                .formLogin()
+                .loginProcessingUrl("/login")
                 .loginPage("/login")
-                .defaultSuccessUrl("/userInfo")
+                .successHandler(loginSuccessHandler)
+                //.successForwardUrl("/userInfo")
                 .failureUrl("/login?error=true")
+                //.permitAll();
                 .usernameParameter("username")
                 .passwordParameter("password");
         http.authorizeRequests().and().logout().logoutUrl("/logout").logoutSuccessUrl("/");

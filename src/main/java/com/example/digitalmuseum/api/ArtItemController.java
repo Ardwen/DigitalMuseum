@@ -12,14 +12,15 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
+@RestController
 public class ArtItemController {
     @Autowired
     ArtItemService artItemService;
     @Autowired
     ArtImageService artImageService;
 
-    @GetMapping("museums/{mid}/arts")
-    public Page list(@PathVariable("mid") int mid, @RequestParam(value = "start", defaultValue = "0") int start,@RequestParam(value = "size", defaultValue = "5") int size) throws Exception {
+    @GetMapping("Museum/{mid}/arts")
+    public Page list(@PathVariable("mid") int mid, @RequestParam(value = "start", defaultValue = "0") int start,@RequestParam(value = "size", defaultValue = "10") int size) throws Exception {
         start = start<0?0:start;
         //Pageable pageable = new PageRequest(start, size);
         Page<ArtItem> page =artItemService.list(mid,start,size);

@@ -2,7 +2,6 @@ package com.example.digitalmuseum.Security;
 
 import com.example.digitalmuseum.dao.UserDAO;
 import com.example.digitalmuseum.model.Security.User;
-import com.example.digitalmuseum.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.social.connect.Connection;
 import org.springframework.social.connect.ConnectionSignUp;

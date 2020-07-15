@@ -44,6 +44,7 @@ public class ArtImageService {
         else
             ArtItem.setFirstArtImage(new ArtImage());
     }
+
     public void setFirstArtImages(List<ArtItem> ArtItems) {
         for (ArtItem ArtItem : ArtItems)
             setFirstArtImage(ArtItem);

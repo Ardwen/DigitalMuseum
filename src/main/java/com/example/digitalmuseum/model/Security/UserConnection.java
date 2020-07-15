@@ -1,10 +1,12 @@
 package com.example.digitalmuseum.model.Security;
 
+
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serializable;
 
 @Entity
 @Table(name = "Userconnection")
@@ -13,19 +15,19 @@ public class UserConnection implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @Column(name = "Userid", length = 255, nullable = false)
+    @Column(name = "User_id", length = 50, nullable = false)
     private String userId;
 
-    @Id
-    @Column(name = "Providerid", length = 255, nullable = false)
+
+    @Column(name = "Providerid", nullable = false)
     private String providerId;
 
-    @Id
-    @Column(name = "Provideruserid", length = 255, nullable = false)
+
+    @Column(name = "Provideruserid", nullable = false)
     private String providerUserId;
 
-    @Column(name = "Rank", nullable = false)
-    private int rank;
+    @Column(name = "Rrank", nullable = false)
+    int rrank;
 
     @Column(name = "Displayname", length = 255, nullable = true)
     private String displayName;
@@ -73,11 +75,11 @@ public class UserConnection implements Serializable {
     }
 
     public int getRank() {
-        return rank;
+        return rrank;
     }
 
     public void setRank(int rank) {
-        this.rank = rank;
+        this.rrank = rank;
     }
 
     public String getDisplayName() {
