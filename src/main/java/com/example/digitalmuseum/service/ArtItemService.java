@@ -4,6 +4,7 @@ package com.example.digitalmuseum.service;
 import com.example.digitalmuseum.dao.ArtItemDAO;
 import com.example.digitalmuseum.model.ArtItem;
 import com.example.digitalmuseum.model.Museume;
+import com.example.digitalmuseum.payload.ArtPost;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,8 +25,13 @@ public class ArtItemService {
 
     public ArtItem get(int id){ return artItemDAO.getOne(id);}
 
-    public void add(ArtItem bean){
-        artItemDAO.save(bean);
+    public ArtItem add(ArtPost bean){
+        Museume mu = museumeService.get(bean.getMuseumeId());
+        ArtItem artItem = new ArtItem();
+        artItem.setIntro(bean.getDescription());
+        artItem.setName(bean.getName());
+        artItem.setMuseume(mu);
+        return artItemDAO.save(artItem);
     }
 
     public void delete(int id){

@@ -41,14 +41,15 @@ public class ArtImageController {
         }
     }
 
-    @PostMapping("/artImages")
-    public Object add(@RequestParam("aid") int pid, @RequestParam("type") String type, MultipartFile image, HttpServletRequest request) throws Exception {
+    @PostMapping("/artImages/add")
+    public Object add(@RequestParam("aid") int pid, @RequestParam("type") String type, @RequestParam("imageFile") MultipartFile image, HttpServletRequest request) throws Exception {
+
         ArtImage bean = new ArtImage();
         ArtItem artItem = artItemService.get(pid);
         bean.setArtItem(artItem);
         bean.setType(type);
 
-        artImageService.add(bean);
+        bean = artImageService.add(bean);
         String folder = "img/";
         if(artImageService.type_single.equals(bean.getType())){
             folder +="artSingle";

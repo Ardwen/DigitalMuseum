@@ -18,8 +18,9 @@ public class ArtImageService {
     @Autowired
     ArtImageDAO artImageDAO;
 
-    public void add(ArtImage bean){
-        artImageDAO.save(bean);
+    public ArtImage add(ArtImage bean){
+
+        return artImageDAO.save(bean);
     }
 
     public void delete(int id){

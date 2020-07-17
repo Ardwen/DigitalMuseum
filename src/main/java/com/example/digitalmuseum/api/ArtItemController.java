@@ -1,6 +1,8 @@
 package com.example.digitalmuseum.api;
 
+import com.example.digitalmuseum.model.ArtImage;
 import com.example.digitalmuseum.model.ArtItem;
+import com.example.digitalmuseum.payload.ArtPost;
 import com.example.digitalmuseum.service.ArtImageService;
 import com.example.digitalmuseum.service.ArtItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,12 +22,12 @@ public class ArtItemController {
     ArtImageService artImageService;
 
     @GetMapping("Museum/{mid}/arts")
-    public Page list(@PathVariable("mid") int mid, @RequestParam(value = "start", defaultValue = "0") int start,@RequestParam(value = "size", defaultValue = "10") int size) throws Exception {
+    public List<ArtItem> list(@PathVariable("mid") int mid, @RequestParam(value = "start", defaultValue = "0") int start,@RequestParam(value = "size", defaultValue = "10") int size) throws Exception {
         start = start<0?0:start;
         //Pageable pageable = new PageRequest(start, size);
         Page<ArtItem> page =artItemService.list(mid,start,size);
         artImageService.setFirstArtImages(page.getContent());
-        return page;
+        return page.getContent();
     }
 
     @GetMapping("/ArtItems/{id}")
@@ -34,10 +36,15 @@ public class ArtItemController {
         return bean;
     }
 
-    @PostMapping("/ArtItems")
-    public Object add(@RequestBody ArtItem bean) throws Exception {
-        artItemService.add(bean);
-        return bean;
+    @PostMapping("/ArtItems/add")
+    public Object add(@RequestBody ArtPost bean) throws Exception {
+        ArtItem createdArt = artItemService.add(bean);
+        for(int i : bean.getImages()){
+            ArtImage arti = artImageService.get(i);
+            arti.setArtItem(createdArt);
+        }
+        artImageService.setFirstArtImage(createdArt);
+        return createdArt;
     }
 
     @DeleteMapping("/ArtItems/{id}")
