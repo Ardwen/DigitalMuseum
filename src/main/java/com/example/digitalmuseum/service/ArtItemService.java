@@ -26,6 +26,7 @@ public class ArtItemService {
     public ArtItem get(int id){ return artItemDAO.getOne(id);}
 
     public ArtItem add(ArtPost bean){
+        System.out.println(bean.getMuseumeId());
         Museume mu = museumeService.get(bean.getMuseumeId());
         ArtItem artItem = new ArtItem();
         artItem.setIntro(bean.getDescription());

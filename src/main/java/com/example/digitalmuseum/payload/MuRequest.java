@@ -1,18 +1,20 @@
 package com.example.digitalmuseum.payload;
 
+import java.util.List;
+
 public class MuRequest {
-    int skip;
+    int page;
     int limit;
-    int cid;
+    List<Integer> cid;
     String country;
     String searchTerm;
 
-    public int getSkip() {
-        return skip;
+    public int getPage() {
+        return page;
     }
 
-    public void setSkip(int skip) {
-        this.skip = skip;
+    public void setPage(int page) {
+        this.page = page;
     }
 
     public int getLimit() {
@@ -23,11 +25,11 @@ public class MuRequest {
         this.limit = limit;
     }
 
-    public int getCid() {
+    public List<Integer> getCid() {
         return cid;
     }
 
-    public void setCid(int cid) {
+    public void setCid(List<Integer> cid) {
         this.cid = cid;
     }
 
