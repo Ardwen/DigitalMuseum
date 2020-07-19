@@ -16,6 +16,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import com.example.digitalmuseum.payload.MuPost;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 public class MuseumeService {
 
@@ -58,33 +61,35 @@ public class MuseumeService {
         museumeDAO.save(bean);
     }
 
-    public Page<Museume> list(int cid, String country, int start, int size) {
-        if(cid == -1 && country.equals("")){return listAll(start,size);}
-        if(cid == -1){return this.listByCountry(country, start, size);}
-        if(country.equals("")){return listByCategory(cid,start,size);}
-        Category category = categoryService.get(cid);
-        Pageable pageable = PageRequest.of(start, size);
-        Page pagedromJPA = museumeDAO.findByCategoryAndCountry(category,country,pageable);
-        return pagedromJPA;
+    public List<Museume> list(List<String> cid, String country) {
+        if(cid.size() == 0 && country.equals("")){return listAll();}
+        if(cid.size() == 0){return this.listByCountry(country);}
+        if(country.equals("")){return listByCategory(cid);}
+        List<Museume> result = new ArrayList<>();
+        for(String id: cid){
+            Category category = categoryService.get(Integer.parseInt(id));
+            result.addAll(museumeDAO.findByCategoryAndCountry(category,country));
+        }
+
+        return result;
     }
 
-    public Page<Museume> listAll(int start, int size) {
-        Pageable pageable = PageRequest.of(start, size);
-        Page pagedromJPA = museumeDAO.findAll(pageable);
-        return pagedromJPA;
+    public List<Museume> listAll() {
+        return museumeDAO.findAll();
     }
 
-    public Page<Museume> listByCategory(int cid,int start, int size) {
-        Category category = categoryService.get(cid);
-        Pageable pageable = PageRequest.of(start, size);
-        Page pagedromJPA = museumeDAO.findByCategory(category,pageable);
-        return pagedromJPA;
+    public List<Museume> listByCategory(List<String> cid) {
+        List<Museume> result = new ArrayList<>();
+        for(String id : cid){
+            Category category = categoryService.get(Integer.parseInt(id));
+            result.addAll(museumeDAO.findByCategory(category));
+        }
+
+        return result;
     }
 
-    public Page<Museume> listByCountry(String country,int start, int size){
-        Pageable pageable = PageRequest.of(start, size);
-        Page pagedromJPA = museumeDAO.findByCountry(country,pageable);
-        return pagedromJPA;
+    public List<Museume> listByCountry(String country){
+        return museumeDAO.findByCountry(country);
     }
 
 

@@ -51,11 +51,11 @@ public class MuseumeController {
     }
 
 
-    @GetMapping("/getMuseum")
-    public Page list(@RequestBody MuRequest var) throws Exception{
-        Page<Museume> page =museumeService.list(var.getCid(),var.getCountry(),var.getSkip(),var.getLimit());
-        muImageService.setFirstMuImages(page.getContent());
-        return page;
+    @PostMapping("/getMuseum")
+    public List<Museume> list(@RequestBody MuRequest var) throws Exception{
+        List<Museume> all =museumeService.list(var.getCid(),var.getCountry());
+        muImageService.setFirstMuImages(all);
+        return all;
     }
 
     @GetMapping("/Museume/{id}")
