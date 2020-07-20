@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RestController
+@CrossOrigin
 public class MuImageController {
 
     @Autowired
@@ -29,27 +30,21 @@ public class MuImageController {
     @GetMapping("/museume/{mid}/muImages")
     public List<MuseumeImage> list(@PathVariable("mid") int mid) throws Exception {
         Museume museume = muService.get(mid);
-        List<MuseumeImage> details =  muImageService.listDetailArtImages(museume);
+        List<MuseumeImage> details =  muImageService.listSingleMuImages(museume);
         return details;
     }
 
     @PostMapping("/AddmuImages")
-    public Object add(@RequestParam("imageFile") MultipartFile image,HttpServletRequest request) throws Exception {
-        int pid = -1;
-        String type = "detail";
+    public Object add(@RequestParam("mid") int pid, @RequestParam("imageFile") MultipartFile image,HttpServletRequest request) throws Exception {
+        String type = "single";
         MuseumeImage bean = new MuseumeImage();
-        if(pid != -1){
-            Museume museume = muService.get(pid);
-            bean.setMuseume(museume);
-        } else {
-            Museume museume = muService.get(1);
-            bean.setMuseume(museume);
-        }
+        Museume museume = muService.get(pid);
+        bean.setMuseume(museume);
         bean.setType(type);
 
         muImageService.add(bean);
 
-        String folder = "img/";
+        String folder = "/Users/apple/Downloads/digitalmuseum/img/";
         if(muImageService.type_single.equals(bean.getType())){
             folder +="muSingle";
         }
@@ -57,10 +52,13 @@ public class MuImageController {
             folder +="muDetail";
         }
 
-        File imageFolder= new File(request.getServletContext().getRealPath(folder));
+        File imageFolder= new File(folder);
+
 
         File file = new File(imageFolder,bean.getId()+".jpg");
-        String fileName = file.getName();
+        String fileName = bean.getId()+".jpg";
+        String toprint = file.getAbsolutePath();
+        System.out.println(toprint);
         if(!file.getParentFile().exists())
             file.getParentFile().mkdirs();
         try {
@@ -72,16 +70,13 @@ public class MuImageController {
         }
 
         if(muImageService.type_single.equals(bean.getType())){
-            String imageFolder_small= request.getServletContext().getRealPath("img/artSingle_small");
-            String imageFolder_middle= request.getServletContext().getRealPath("img/artSingle_middle");
+            String imageFolder_small= "img/muSingle_small";
+            String imageFolder_middle= "img/muSingle_middle";
             File f_small = new File(imageFolder_small, fileName);
             File f_middle = new File(imageFolder_middle, fileName);
-            f_small.getParentFile().mkdirs();
-            f_middle.getParentFile().mkdirs();
             ImageUtil.resizeImage(file, 56, 56, f_small);
             ImageUtil.resizeImage(file, 217, 190, f_middle);
         }
-
         return bean;
     }
 
@@ -103,8 +98,8 @@ public class MuImageController {
         file.delete();
 
         if(muImageService.type_single.equals(bean.getType())) {
-            String imageFolder_small = request.getServletContext().getRealPath("img/artSingle_small");
-            String imageFolder_middle = request.getServletContext().getRealPath("img/artSingle_middle");
+            String imageFolder_small = request.getServletContext().getRealPath("img/muSingle_small");
+            String imageFolder_middle = request.getServletContext().getRealPath("img/muSingle_middle");
             File f_small = new File(imageFolder_small, fileName);
             File f_middle = new File(imageFolder_middle, fileName);
             f_small.delete();
