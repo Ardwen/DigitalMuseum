@@ -1,14 +1,22 @@
 package com.example.digitalmuseum.api;
 
 
-import com.example.digitalmuseum.Security.AppUserValidator;
+import com.example.digitalmuseum.Security.Jwt.JwtTokenUtil;
+import com.example.digitalmuseum.Security.Jwt.JwtUserDetailsService;
 import com.example.digitalmuseum.Util.AuthUtil;
 import com.example.digitalmuseum.Util.WebUtils;
 import com.example.digitalmuseum.dao.UserDAO;
 import com.example.digitalmuseum.model.Security.AppRole;
 import com.example.digitalmuseum.model.Security.User;
 import com.example.digitalmuseum.payload.AppUserForm;
+import com.example.digitalmuseum.payload.JwtRequest;
+import com.example.digitalmuseum.payload.JwtResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.social.connect.Connection;
@@ -19,11 +27,9 @@ import org.springframework.social.connect.web.ProviderSignInUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.security.core.Authentication;
 
 import javax.transaction.Transactional;
@@ -44,51 +50,42 @@ public class UserController {
     private UsersConnectionRepository connectionRepository;
 
     @Autowired
-    private AppUserValidator appUserValidator;
+    private AuthenticationManager authenticationManager;
 
-    @InitBinder
-    protected void initBinder(WebDataBinder dataBinder) {
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
-        Object target = dataBinder.getTarget();
-        if (target == null) {
-            return;
+    @Autowired
+    private JwtUserDetailsService userDetailsService;
+
+    //authenticate user
+    @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
+    public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
+
+        authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+
+        final UserDetails userDetails = userDetailsService
+                .loadUserByUsername(authenticationRequest.getUsername());
+
+        final String token = jwtTokenUtil.generateToken(userDetails);
+
+        return ResponseEntity.ok(new JwtResponse(token));
+
+    }
+
+    /**
+     *  get password from clinet and generate json web token
+     * */
+    private void authenticate(String username, String password) throws Exception {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
+        } catch (DisabledException e) {
+            throw new Exception("USER_DISABLED", e);
+        } catch (BadCredentialsException e) {
+            throw new Exception("INVALID_CREDENTIALS", e);
         }
-        System.out.println("Target=" + target);
-
-        if (target.getClass() == AppUserForm.class) {
-            dataBinder.setValidator(appUserValidator);
-        }
     }
 
-
-
-    @RequestMapping(value = "/admin", method = RequestMethod.GET)
-    public String adminPage(Model model, Principal principal) {
-        String userName = principal.getName();
-        System.out.println("User Name: " + userName);
-        UserDetails loginedUser = (UserDetails) ((Authentication) principal).getPrincipal();
-        String userInfo = WebUtils.toString(loginedUser);
-        model.addAttribute("userInfo", userInfo);
-        return "adminPage";
-    }
-/*
-	@RequestMapping(value = "/logoutSuccessful", method = RequestMethod.GET)
-	public String logoutSuccessfulPage(Model model) {
-		model.addAttribute("title", "Logout");
-		System.out.println("logout called");
-		return "logoutSuccessfulPage";
-	}*/
-
-    @CrossOrigin
-    @RequestMapping(value = "/userInfo", method = RequestMethod.POST)
-    public Object userInfo() {
-        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String username = principal.getUsername();
-        System.out.println("User Name: " + username);
-        User loginedUser = appUserDAO.findAppUserByUserName(username);
-        //model.addAttribute("userInfo", userInfo);
-        return loginedUser;
-    }
 
     @CrossOrigin
     @RequestMapping(value = "/403", method = RequestMethod.GET)
@@ -110,7 +107,7 @@ public class UserController {
         return "403Page";
     }
 
-    @CrossOrigin
+    /*@CrossOrigin
     @RequestMapping(value = { "/login" }, method = RequestMethod.GET)
     public String login(Model model) {
         return "loginPage";
@@ -119,9 +116,8 @@ public class UserController {
     @RequestMapping(value = { "/signin" }, method = RequestMethod.GET)
     public String signInPage(Model model) {
         return "redirect:/login";
-    }
+    }*/
 
-    @CrossOrigin
     @RequestMapping(value = { "/register" }, method = RequestMethod.GET)
     public String signupPage(WebRequest request, Model model) {
         ProviderSignInUtils providerSignInUtils = new ProviderSignInUtils(connectionFactoryLocator,
@@ -164,7 +160,6 @@ public class UserController {
         }
 
         AuthUtil.logInUser(registered, roleNames);
-
         return "redirect:/userInfo";
     }
 

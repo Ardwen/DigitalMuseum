@@ -1,8 +1,6 @@
 package com.example.digitalmuseum.Util;
 
-import com.example.digitalmuseum.Security.SocialUserDetailsImpl;
 import com.example.digitalmuseum.model.Security.User;
-import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

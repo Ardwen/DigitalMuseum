@@ -1,8 +1,7 @@
-package com.example.digitalmuseum.Security;
+package com.example.digitalmuseum.Security.Jwt;
 
 import com.example.digitalmuseum.dao.AppRoleDAO;
 import com.example.digitalmuseum.dao.UserDAO;
-import com.example.digitalmuseum.model.Security.AppRole;
 import com.example.digitalmuseum.model.Security.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -10,16 +9,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@Transactional
-public class UserDetailsServiceImpl implements UserDetailsService {
-
+public class JwtUserDetailsService implements UserDetailsService {
     @Autowired
     private UserDAO appUserDAO;
 
@@ -28,7 +24,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        System.out.println("UserDetailsServiceImpl.loadUserByUsername=" + username);
         User appUser = this.appUserDAO.findAppUserByUserName(username);
 
         if (appUser == null) {
@@ -47,10 +42,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 grantList.add(authority);
             }
         }
+        return new org.springframework.security.core.userdetails.User(appUser.getUsername(),appUser.getEncrytedPassword(),grantList);
 
-        SocialUserDetailsImpl userDetails = new SocialUserDetailsImpl(appUser, roleNames);
-
-        return userDetails;
     }
-
 }

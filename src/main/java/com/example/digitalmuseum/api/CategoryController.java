@@ -13,7 +13,7 @@ public class CategoryController {
     @Autowired CategoryService categoryService;
 
     @CrossOrigin
-    @GetMapping("/categories")
+    @GetMapping("/public/categories")
     public List<Category> list() throws Exception {
         return categoryService.list();
     }

@@ -1,6 +1,8 @@
 package com.example.digitalmuseum.Util;
 
 
+import org.springframework.web.multipart.MultipartFile;
+
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -13,6 +15,7 @@ import java.awt.image.Raster;
 import java.awt.image.RenderedImage;
 import java.awt.image.WritableRaster;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
@@ -38,10 +41,16 @@ public class ImageUtil {
         }
     }
 
+    public static File convertMultipartToFile(MultipartFile file) throws IOException {
+        File convertFile = new File(file.getOriginalFilename());
+        FileOutputStream fos = new FileOutputStream(convertFile);
+        fos.write(file.getBytes());
+        fos.close();
+        return convertFile;
+    }
+
     public static void resizeImage(File srcFile, int width,int height, File destFile) {
         try {
-            if(!destFile.getParentFile().exists())
-                destFile.getParentFile().mkdirs();
             Image i = ImageIO.read(srcFile);
             i = resizeImage(i, width, height);
             ImageIO.write((RenderedImage) i, "jpg", destFile);

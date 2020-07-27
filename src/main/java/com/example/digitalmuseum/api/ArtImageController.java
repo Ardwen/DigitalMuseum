@@ -4,6 +4,7 @@ package com.example.digitalmuseum.api;
 import com.example.digitalmuseum.Util.ImageUtil;
 import com.example.digitalmuseum.model.ArtImage;
 import com.example.digitalmuseum.model.ArtItem;
+import com.example.digitalmuseum.service.AWSService;
 import com.example.digitalmuseum.service.ArtImageService;
 import com.example.digitalmuseum.service.ArtItemService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +25,10 @@ public class ArtImageController {
     ArtImageService artImageService;
     ArtItemService artItemService;
 
-    @GetMapping("/arts/{aid}/artImages")
+    @Autowired
+    AWSService amazonService;
+
+    @GetMapping("/public/arts/{aid}/artImages")
     public List<ArtImage> list(@RequestParam("type") String type, @PathVariable("aid") int pid) throws Exception {
         ArtItem artitem = artItemService.get(pid);
 
@@ -43,73 +47,66 @@ public class ArtImageController {
 
     @PostMapping("/artImages/add")
     public Object add(@RequestParam("aid") int pid, @RequestParam("type") String type, @RequestParam("imageFile") MultipartFile image, HttpServletRequest request) throws Exception {
-
         ArtImage bean = new ArtImage();
-        ArtItem artItem = artItemService.get(pid);
-        bean.setArtItem(artItem);
+        if(pid != 1) {
+            ArtItem artItem = artItemService.get(pid);
+            bean.setArtItem(artItem);
+        }
         bean.setType(type);
-
-        bean = artImageService.add(bean);
-        String folder = "img/";
-        if(artImageService.type_single.equals(bean.getType())){
-            folder +="artSingle";
+        artImageService.add(bean);
+        String fileName = "";
+        if(type.equals("single")){
+            fileName +="artSingle/";
         }
         else{
-            folder +="artDetail";
+            fileName +="artDetail/";
         }
-        File imageFolder= new File(request.getServletContext().getRealPath(folder));
-        File file = new File(imageFolder,bean.getId()+".jpg");
-        String fileName = file.getName();
-        if(!file.getParentFile().exists())
-            file.getParentFile().mkdirs();
-        try {
-            image.transferTo(file);
-            BufferedImage img = ImageUtil.change2jpg(file);
-            ImageIO.write(img, "jpg", file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if(artImageService.type_single.equals(bean.getType())){
-            String imageFolder_small= request.getServletContext().getRealPath("img/artSingle_small");
-            String imageFolder_middle= request.getServletContext().getRealPath("img/artSingle_middle");
-            File f_small = new File(imageFolder_small, fileName);
-            File f_middle = new File(imageFolder_middle, fileName);
-            f_small.getParentFile().mkdirs();
-            f_middle.getParentFile().mkdirs();
-            ImageUtil.resizeImage(file, 56, 56, f_small);
-            ImageUtil.resizeImage(file, 217, 190, f_middle);
-        }
-
-        return bean;
-    }
-
-    @DeleteMapping("artImages/{aid}")
-    public String delete(@PathVariable("aid") int aid, HttpServletRequest request) throws Exception{
-        ArtImage bean = artImageService.get(aid);
-        artItemService.delete(aid);
-
-        String folder = "img/";
-        if(artImageService.type_single.equals(bean.getType())){
-            folder +="artSingle";
-        }
-        else{
-            folder +="artDetail";
-        }
-        File imageFolder= new File(request.getServletContext().getRealPath(folder));
-        File file = new File(imageFolder,bean.getId()+".jpg");
-        String fileName = file.getName();
-        file.delete();
-
-        if(artImageService.type_single.equals(bean.getType())) {
-            String imageFolder_small = request.getServletContext().getRealPath("img/artSingle_small");
-            String imageFolder_middle = request.getServletContext().getRealPath("img/artSingle_middle");
-            File f_small = new File(imageFolder_small, fileName);
-            File f_middle = new File(imageFolder_middle, fileName);
+        int id = bean.getId();
+        fileName += id+ ".jpg";
+        File file = ImageUtil.convertMultipartToFile(image);
+        BufferedImage img = ImageUtil.change2jpg(file);
+        ImageIO.write(img,"jpg",file);
+        amazonService.uploadFile(file,fileName);
+        System.out.println(fileName);
+        if(type.equals("single")){
+            File f_small = new File(file.getName());
+            File f_middle = new File(file.getName());
+            String f_small_name = "artSingle_small/" + id + ".jpg";
+            String f_middle_name = "artSingle_middle/" + id + ".jpg";
+            ImageUtil.resizeImage(file, 300, 200, f_middle);
+            amazonService.uploadFile(f_small,f_small_name);
+            ImageUtil.resizeImage(file, 90, 60, f_small);
+            amazonService.uploadFile(f_middle,f_middle_name);
             f_small.delete();
             f_middle.delete();
         }
-        return null;
+        file.delete();
+        return bean;
+
+    }
+
+    @DeleteMapping("/artImages/{aid}")
+    public String delete(@PathVariable("aid") int aid, HttpServletRequest request) throws Exception{
+        ArtImage bean = artImageService.get(aid);
+        String type = bean.getType();
+        String fileName = "";
+        if(type.equals("single")){
+            fileName +="artSingle/";
+        }
+        else{
+            fileName +="artDetail/";
+        }
+        int id = bean.getId();
+        fileName += id+ ".jpg";
+        amazonService.deleteFileFromS3Bucket(fileName);
+        if(type.equals("single")) {
+            String f_small_name = "artSingle_small/" + id + ".jpg";
+            String f_middle_name = "artSingle_middle/" + id + ".jpg";
+            amazonService.deleteFileFromS3Bucket(f_middle_name);
+            amazonService.deleteFileFromS3Bucket(f_small_name);
+        }
+        artImageService.delete(aid);
+        return "sucess";
     }
 
 }

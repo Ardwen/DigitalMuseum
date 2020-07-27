@@ -22,6 +22,11 @@ public class MuImageService {
         muImageDAO.save(bean);
     }
 
+    public void save(MuseumeImage bean){
+
+        muImageDAO.save(bean);
+    }
+
     public void delete(int id){
         muImageDAO.deleteById(id);
     }

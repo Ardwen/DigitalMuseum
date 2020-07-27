@@ -57,8 +57,15 @@ public class MuseumeService {
     }
 
    // @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public void update(Museume bean){
-        museumeDAO.save(bean);
+    public void update(MuPost bean, int id){
+        Museume newmu = this.get(id);
+        newmu.setName(bean.getTitle());
+        newmu.setCountry(bean.getCountry());
+        newmu.setCity(bean.getCity());
+        newmu.setIntroduction(bean.getDescription());
+        newmu.setCategory(categoryService.get(bean.getCategory()));
+        newmu.setLink(bean.getLink());
+        museumeDAO.save(newmu);
     }
 
     public List<Museume> list(List<String> cid, String country) {
@@ -88,9 +95,17 @@ public class MuseumeService {
         return result;
     }
 
+    public List<Museume> listByUser(String username){
+        User user = userDAO.findAppUserByUserName(username);
+        return museumeDAO.findByUser(user);
+    }
+
     public List<Museume> listByCountry(String country){
         return museumeDAO.findByCountry(country);
     }
 
+    public void delete(int mid){
+        museumeDAO.deleteById(mid);
+    }
 
 }

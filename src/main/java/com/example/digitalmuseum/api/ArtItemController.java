@@ -21,7 +21,7 @@ public class ArtItemController {
     @Autowired
     ArtImageService artImageService;
 
-    @GetMapping("Museum/{mid}/arts")
+    @GetMapping("/public/Museume/{mid}/arts")
     public List<ArtItem> list(@PathVariable("mid") int mid, @RequestParam(value = "start", defaultValue = "0") int start,@RequestParam(value = "size", defaultValue = "10") int size) throws Exception {
         start = start<0?0:start;
         //Pageable pageable = new PageRequest(start, size);

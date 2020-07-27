@@ -37,21 +37,22 @@ public class MuseumeController {
 
     @CrossOrigin
     @PostMapping("/AddMuseume/{username}")
-    //@PreAuthorize(value="hasRole('ROLE_ADMIN')")
     public Object add(@PathVariable("username") String username, @RequestBody MuPost bean, HttpServletRequest request) throws Exception {
         Museume museume = museumeService.add(bean,username);
 
-        List<Integer> mu = bean.getImages();
-        for(int i: mu){
+        List<Integer> mui = bean.getImages();
+        for(int i: mui){
+            System.out.println(i);
             MuseumeImage muimage = muImageService.get(i);
             muimage.setMuseume(museume);
+            muImageService.save(muimage);
         }
 
         return museume;
     }
 
 
-    @PostMapping("/getMuseum")
+    @PostMapping("/public/getMuseum")
     public List<Museume> list(@RequestBody MuRequest var) throws Exception{
         List<Museume> all =museumeService.list(var.getCid(),var.getCountry());
         muImageService.setFirstMuImages(all);
@@ -65,5 +66,24 @@ public class MuseumeController {
         return bean;
     }
 
+    @GetMapping("/ListMuseume/{username}")
+    public List<Museume> getByUser(@PathVariable("username") String username) throws Exception {
+        List<Museume> all =museumeService.listByUser(username);
+        muImageService.setFirstMuImages(all);
+        return all;
+    }
+
+    @PostMapping("/EditMuseume/{mid}")
+    //@PreAuthorize(value="hasRole('ROLE_ADMIN')")
+    public Object add(@PathVariable("mid") int mid, @RequestBody MuPost bean) throws Exception {
+        museumeService.update(bean,mid);
+        return "success";
+    }
+
+    @DeleteMapping("/deleteMuseume/{mid}")
+    public String delete(@PathVariable("mid") int mid) throws Exception{
+        museumeService.delete(mid);
+        return "sucess";
+    }
 
 }

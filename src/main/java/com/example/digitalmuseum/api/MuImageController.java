@@ -4,6 +4,7 @@ package com.example.digitalmuseum.api;
 import com.example.digitalmuseum.Util.ImageUtil;
 import com.example.digitalmuseum.model.Museume;
 import com.example.digitalmuseum.model.MuseumeImage;
+import com.example.digitalmuseum.service.AWSService;
 import com.example.digitalmuseum.service.MuImageService;
 import com.example.digitalmuseum.service.MuseumeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,6 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -27,7 +26,10 @@ public class MuImageController {
     @Autowired
     MuseumeService muService;
 
-    @GetMapping("/museume/{mid}/muImages")
+    @Autowired
+    AWSService amazonService;
+
+    @GetMapping("/public/museume/{mid}/muImages")
     public List<MuseumeImage> list(@PathVariable("mid") int mid) throws Exception {
         Museume museume = muService.get(mid);
         List<MuseumeImage> details =  muImageService.listSingleMuImages(museume);
@@ -35,77 +37,65 @@ public class MuImageController {
     }
 
     @PostMapping("/AddmuImages")
-    public Object add(@RequestParam("mid") int pid, @RequestParam("imageFile") MultipartFile image,HttpServletRequest request) throws Exception {
-        String type = "single";
+    public Object add(@RequestParam("type") String type, @RequestParam("mid") int pid, @RequestParam("imageFile") MultipartFile image) throws Exception {
         MuseumeImage bean = new MuseumeImage();
-        Museume museume = muService.get(pid);
-        bean.setMuseume(museume);
+        if(pid != 1) {
+            Museume museume = muService.get(pid);
+            bean.setMuseume(museume);
+        }
         bean.setType(type);
-
         muImageService.add(bean);
-
-        String folder = "/Users/apple/Downloads/digitalmuseum/img/";
-        if(muImageService.type_single.equals(bean.getType())){
-            folder +="muSingle";
+        String fileName = "";
+        if(type.equals("single")){
+            fileName +="muSingle/";
         }
         else{
-            folder +="muDetail";
+            fileName +="muDetail/";
         }
-
-        File imageFolder= new File(folder);
-
-
-        File file = new File(imageFolder,bean.getId()+".jpg");
-        String fileName = bean.getId()+".jpg";
-        String toprint = file.getAbsolutePath();
-        System.out.println(toprint);
-        if(!file.getParentFile().exists())
-            file.getParentFile().mkdirs();
-        try {
-            image.transferTo(file);
-            BufferedImage img = ImageUtil.change2jpg(file);
-            ImageIO.write(img, "jpg", file);
-        } catch (IOException e) {
-            e.printStackTrace();
+        int id = bean.getId();
+        fileName += id+ ".jpg";
+        File file = ImageUtil.convertMultipartToFile(image);
+        BufferedImage img = ImageUtil.change2jpg(file);
+        ImageIO.write(img,"jpg",file);
+        amazonService.uploadFile(file,fileName);
+        System.out.println(fileName);
+        if(type.equals("single")){
+            File f_small = new File(file.getName());
+            File f_middle = new File(file.getName());
+            String f_small_name = "muSingle_small/" + id + ".jpg";
+            String f_middle_name = "muSingle_middle/" + id + ".jpg";
+            ImageUtil.resizeImage(file, 300, 200, f_middle);
+            amazonService.uploadFile(f_small,f_small_name);
+            ImageUtil.resizeImage(file, 90, 60, f_small);
+            amazonService.uploadFile(f_middle,f_middle_name);
+            f_small.delete();
+            f_middle.delete();
         }
-
-        if(muImageService.type_single.equals(bean.getType())){
-            String imageFolder_small= "img/muSingle_small";
-            String imageFolder_middle= "img/muSingle_middle";
-            File f_small = new File(imageFolder_small, fileName);
-            File f_middle = new File(imageFolder_middle, fileName);
-            ImageUtil.resizeImage(file, 56, 56, f_small);
-            ImageUtil.resizeImage(file, 217, 190, f_middle);
-        }
+        file.delete();
         return bean;
     }
 
     @DeleteMapping("muImages/{aid}")
-    public String delete(@PathVariable("aid") int aid, HttpServletRequest request) throws Exception{
+    public void delete(@PathVariable("aid") int aid) throws Exception{
         MuseumeImage bean = muImageService.get(aid);
-        muImageService.delete(aid);
-
-        String folder = "img/";
-        if(muImageService.type_single.equals(bean.getType())){
-            folder +="muSingle";
+        String type = bean.getType();
+        String fileName = "";
+        if(type.equals("single")){
+            fileName +="muSingle/";
         }
         else{
-            folder +="muDetail";
+            fileName +="muDetail/";
         }
-        File imageFolder= new File(request.getServletContext().getRealPath(folder));
-        File file = new File(imageFolder,bean.getId()+".jpg");
-        String fileName = file.getName();
-        file.delete();
-
-        if(muImageService.type_single.equals(bean.getType())) {
-            String imageFolder_small = request.getServletContext().getRealPath("img/muSingle_small");
-            String imageFolder_middle = request.getServletContext().getRealPath("img/muSingle_middle");
-            File f_small = new File(imageFolder_small, fileName);
-            File f_middle = new File(imageFolder_middle, fileName);
-            f_small.delete();
-            f_middle.delete();
+        int id = bean.getId();
+        fileName += id+ ".jpg";
+        amazonService.deleteFileFromS3Bucket(fileName);
+        if(type.equals("single")) {
+            String f_small_name = "muSingle_small/" + id + ".jpg";
+            String f_middle_name = "muSingle_middle/" + id + ".jpg";
+            amazonService.deleteFileFromS3Bucket(f_middle_name);
+            amazonService.deleteFileFromS3Bucket(f_small_name);
         }
-        return null;
+        muImageService.delete(aid);
     }
 
 }
